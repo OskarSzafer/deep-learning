@@ -1,7 +1,7 @@
 import numpy as np
 
 class NN:
-    def __init__(self, input_size, hidden_size = 10, hidden_quantity = 1, output_size = 1, activation = 'ReLU'):
+    def __init__(self, input_size, hidden_size = 10, hidden_quantity = 1, output_size = 1, activation = 'relu'):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.hidden_quantity = hidden_quantity
@@ -28,6 +28,19 @@ class NN:
         # print(self.input_to_hidden)
         # print(self.hidden_to_hidden)
         # print(self.hidden_to_output)
+
+        functions = {
+            'relu': self.relu,
+            'sigmoid': self.sigmoid
+        }
+
+        self.activation = functions[activation]
+
+    def relu(self, x):
+        return np.maximum(0, x)
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
 
 
 nn = NN(2, 3, 2, 1)
