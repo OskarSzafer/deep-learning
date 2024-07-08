@@ -1,6 +1,21 @@
 import numpy as np
 
 class NN:
+    # ACTIVATION FUNCTIONS
+    class ReLU:
+        def function(self, x):
+            return np.maximum(0, x)
+
+        def derivative(self, x):
+            return np.where(x <= 0, 0, 1)
+
+    class Sigmoid:
+        def function(self, x):
+            return 1 / (1 + np.exp(-x))
+
+        def derivative(self, x):
+            return x * (1 - x)
+
     def __init__(self, input_size, hidden_size = 10, hidden_quantity = 1, output_size = 1, activation = 'relu'):
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -30,17 +45,57 @@ class NN:
         # print(self.hidden_to_output)
 
         functions = {
-            'relu': self.relu,
-            'sigmoid': self.sigmoid
+            'relu': self.ReLU,
+            'sigmoid': self.Sigmoid
         }
 
-        self.activation = functions[activation]
-
-    def relu(self, x):
-        return np.maximum(0, x)
-
-    def sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
+        self.activation = functions[activation]()
+        self.activation.function = np.vectorize(self.activation.function)
+        self.activation.derivative = np.vectorize(self.activation.derivative)
 
 
-nn = NN(2, 3, 2, 1)
+    def run(self, input_vector):
+        self.input_layer = input_vector
+
+        self.hidden_layer[0] = self.activation.function(np.dot(self.input_to_hidden, self.input_layer) + self.hidden_layer_bias[0])
+
+        for i in range(1, self.hidden_quantity):
+            self.hidden_layer[i] = self.activation.function(np.dot(self.hidden_to_hidden[i - 1], self.hidden_layer[i - 1]) + self.hidden_layer_bias[i])
+
+        self.output_layer = self.activation.function(np.dot(self.hidden_to_output, self.hidden_layer[-1]) + self.output_layer_bias)
+
+        return self.output_layer
+        
+    def backpropagation(self, input_vector, target_vector):
+        self.run(input_vector)
+
+        self.hidden_layer_error = np.zeros((self.hidden_quantity, self.hidden_size))
+        self.output_layer_error = np.zeros(self.output_size)
+
+        self.input_to_hidden_error = np.zeros((self.hidden_size, self.input_size))
+        self.hidden_to_hidden_error = np.zeros((self.hidden_quantity - 1, self.hidden_size, self.hidden_size))
+        self.hidden_to_output_error = np.zeros((self.output_size, self.hidden_size))
+
+        # calculate neuron errors
+        self.output_layer_error = (target_vector - self.output_layer)**2
+        self.hidden_layer_error[-1] = np.dot(self.hidden_to_output.T, self.output_layer_error) * self.activation.derivative(self.hidden_layer[-1])
+
+        for i in range(-2, self.hidden_quantity, -1):
+            self.hidden_layer_error[i] = np.dot(self.hidden_to_output.T, self.hidden_layer_error[i+1]) * self.activation.derivative(self.hidden_layer[i])
+
+        # calculate weight errors
+        self.hidden_to_output_error = np.dot(self.hidden_layer[-1].reshape(-1, 1), self.output_layer_error.reshape(1, -1)) * self.activation.derivative(self.output_layer)
+        for i in range(-2, self.hidden_quantity, -1):
+            self.hidden_to_hidden_error[i] = np.dot(self.hidden_layer[i].reshape(-1, 1), self.hidden_layer_error[i+1].reshape(1, -1)) * self.activation.derivative(self.hidden_layer[i])
+
+        self.input_to_hidden_error = np.dot(self.input_layer.reshape(-1, 1), self.hidden_layer_error[0].reshape(1, -1)) * self.activation.derivative(self.hidden_layer[0])
+
+
+
+nn = NN(2, 3, 2, 2)
+nn.run(np.array([1, 0]))
+nn.backpropagation(np.array([1, 0]), np.array([1, 0]))
+
+# a = np.array([1, 0])
+# b = np.array([[1, 2, 3],[4, 5, 6]])
+# print(np.dot(a, b))
