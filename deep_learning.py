@@ -93,33 +93,36 @@ class NN:
 
 
     def train(self, input_vectors, target_vectors, learning_rate = 0.1, epochs = 100):
-        self.hidden_layer_cumulative = np.zeros((self.hidden_quantity, self.hidden_size))
-        self.output_layer_cumulative = np.zeros(self.output_size)
+        for j in range(epochs):
+            self.hidden_layer_cumulative = np.zeros((self.hidden_quantity, self.hidden_size))
+            self.output_layer_cumulative = np.zeros(self.output_size)
 
-        self.input_to_hidden_cumulative = np.zeros((self.hidden_size, self.input_size))
-        self.hidden_to_hidden_cumulative = np.zeros((self.hidden_quantity - 1, self.hidden_size, self.hidden_size))
-        self.hidden_to_output_cumulative = np.zeros((self.output_size, self.hidden_size))
+            self.input_to_hidden_cumulative = np.zeros((self.hidden_size, self.input_size))
+            self.hidden_to_hidden_cumulative = np.zeros((self.hidden_quantity - 1, self.hidden_size, self.hidden_size))
+            self.hidden_to_output_cumulative = np.zeros((self.output_size, self.hidden_size))
 
-        set_size = len(input_vectors)
+            set_size = len(input_vectors)
 
-        for i in range(set_size):
-            self.backpropagation(input_vectors[i], target_vectors[i])
+            for i in range(set_size):
+                self.backpropagation(input_vectors[i], target_vectors[i])
 
-            self.hidden_layer_cumulative += self.hidden_layer_error
-            self.output_layer_cumulative += self.output_layer_error
+                self.hidden_layer_cumulative += self.hidden_layer_error
+                self.output_layer_cumulative += self.output_layer_error
 
-            self.input_to_hidden_cumulative += self.input_to_hidden_error.T
-            self.hidden_to_hidden_cumulative += self.hidden_to_hidden_error
-            self.hidden_to_output_cumulative += self.hidden_to_output_error.T
+                self.input_to_hidden_cumulative += self.input_to_hidden_error.T
+                self.hidden_to_hidden_cumulative += self.hidden_to_hidden_error
+                self.hidden_to_output_cumulative += self.hidden_to_output_error.T
 
-            print(f'{i+1} of {set_size}')
+                print(f'case {i+1} of {set_size}')
 
-        self.hidden_layer_bias += learning_rate * self.hidden_layer_cumulative / set_size
-        self.output_layer_bias += learning_rate * self.output_layer_cumulative / set_size
+            self.hidden_layer_bias += learning_rate * self.hidden_layer_cumulative / set_size
+            self.output_layer_bias += learning_rate * self.output_layer_cumulative / set_size
 
-        self.input_to_hidden += learning_rate * self.input_to_hidden_cumulative / set_size
-        self.hidden_to_hidden += learning_rate * self.hidden_to_hidden_cumulative / set_size
-        self.hidden_to_output += learning_rate * self.hidden_to_output_cumulative / set_size
+            self.input_to_hidden += learning_rate * self.input_to_hidden_cumulative / set_size
+            self.hidden_to_hidden += learning_rate * self.hidden_to_hidden_cumulative / set_size
+            self.hidden_to_output += learning_rate * self.hidden_to_output_cumulative / set_size
+
+            print(f'epoch {j+1} of {epochs}')
 
         print(f'finished training')
 
