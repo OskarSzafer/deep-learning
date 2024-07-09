@@ -112,7 +112,7 @@ class NN:
             self.hidden_to_hidden_cumulative += self.hidden_to_hidden_error
             self.hidden_to_output_cumulative += self.hidden_to_output_error.T
 
-            print(f'epoch {i+1} of {set_size}')
+            print(f'{i+1} of {set_size}')
 
         self.hidden_layer_bias += learning_rate * self.hidden_layer_cumulative / set_size
         self.output_layer_bias += learning_rate * self.output_layer_cumulative / set_size
@@ -121,7 +121,7 @@ class NN:
         self.hidden_to_hidden += learning_rate * self.hidden_to_hidden_cumulative / set_size
         self.hidden_to_output += learning_rate * self.hidden_to_output_cumulative / set_size
 
-        print(f'finished training {set_size} epochs')
+        print(f'finished training')
 
             
 
