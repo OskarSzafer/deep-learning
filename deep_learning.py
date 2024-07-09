@@ -66,6 +66,7 @@ class NN:
 
         return self.output_layer
         
+
     def backpropagation(self, input_vector, target_vector):
         self.run(input_vector)
 
@@ -91,10 +92,46 @@ class NN:
         self.input_to_hidden_error = np.dot(self.input_layer.reshape(-1, 1), self.hidden_layer_error[0].reshape(1, -1)) * self.activation.derivative(self.hidden_layer[0])
 
 
+    def train(self, input_vectors, target_vectors, learning_rate = 0.1, epochs = 100):
+        self.hidden_layer_cumulative = np.zeros((self.hidden_quantity, self.hidden_size))
+        self.output_layer_cumulative = np.zeros(self.output_size)
+
+        self.input_to_hidden_cumulative = np.zeros((self.hidden_size, self.input_size))
+        self.hidden_to_hidden_cumulative = np.zeros((self.hidden_quantity - 1, self.hidden_size, self.hidden_size))
+        self.hidden_to_output_cumulative = np.zeros((self.output_size, self.hidden_size))
+
+        set_size = len(input_vectors)
+
+        for i in range(set_size):
+            self.backpropagation(input_vectors[i], target_vectors[i])
+
+            self.hidden_layer_cumulative += self.hidden_layer_error
+            self.output_layer_cumulative += self.output_layer_error
+
+            self.input_to_hidden_cumulative += self.input_to_hidden_error.T
+            self.hidden_to_hidden_cumulative += self.hidden_to_hidden_error
+            self.hidden_to_output_cumulative += self.hidden_to_output_error.T
+
+            print(f'epoch {i+1} of {set_size}')
+
+        self.hidden_layer_bias += learning_rate * self.hidden_layer_cumulative / set_size
+        self.output_layer_bias += learning_rate * self.output_layer_cumulative / set_size
+
+        self.input_to_hidden += learning_rate * self.input_to_hidden_cumulative / set_size
+        self.hidden_to_hidden += learning_rate * self.hidden_to_hidden_cumulative / set_size
+        self.hidden_to_output += learning_rate * self.hidden_to_output_cumulative / set_size
+
+        print(f'finished training {set_size} epochs')
+
+            
+
+
+
 
 nn = NN(2, 3, 2, 2)
 nn.run(np.array([1, 0]))
 nn.backpropagation(np.array([1, 0]), np.array([1, 0]))
+nn.train([np.array([1, 0]), np.array([0, 1])], [np.array([1, 0]), np.array([0, 1])])
 
 # a = np.array([1, 0])
 # b = np.array([[1, 2, 3],[4, 5, 6]])
