@@ -55,6 +55,15 @@ class NN:
 
         self.output_layer = self.activation_function(np.dot(self.hidden_to_output, self.hidden_layer[-1]) + self.output_layer_bias)
         return self.output_layer
+
+    def predict(self, input_vector):
+        set_size = len(input_vector)
+        output = np.zeros((set_size, self.output_size))
+        for i in range(set_size):
+            output[i] = self.run(input_vector[i])
+
+        return output
+            
         
 
     def backpropagation(self, input_vector, target_vector):
@@ -98,7 +107,7 @@ class NN:
 
             for i in range(set_size):
                 self.backpropagation(input_vectors[i], target_vectors[i])
-                print(self.output_layer)
+                #print(self.output_layer)
 
                 self.input_layer_cumulative += self.input_layer_error
                 self.hidden_layer_cumulative += self.hidden_layer_error
@@ -108,7 +117,7 @@ class NN:
                 self.hidden_to_hidden_cumulative += self.hidden_to_hidden_error
                 self.hidden_to_output_cumulative += self.hidden_to_output_error.T
 
-                print(f'case {i+1} of {set_size}')
+                #print(f'case {i+1} of {set_size}')
 
             self.input_layer_bias += learning_rate * self.input_layer_cumulative / set_size
             self.hidden_layer_bias += learning_rate * self.hidden_layer_cumulative / set_size
@@ -118,7 +127,7 @@ class NN:
             self.hidden_to_hidden += learning_rate * self.hidden_to_hidden_cumulative / set_size
             self.hidden_to_output += learning_rate * self.hidden_to_output_cumulative / set_size
 
-            print(f'epoch {j+1} of {epochs}')
+            #print(f'epoch {j+1} of {epochs}')
 
         print(f'finished training')
 
@@ -127,12 +136,12 @@ class NN:
 
 
 
-nn = NN(2, 3, 2, 2)
-nn.run(np.array([1, 0]))
-nn.backpropagation(np.array([1, 0]), np.array([1, 0]))
-nn.train([np.array([1, 0]), np.array([0, 1])], [np.array([1, 0]), np.array([0, 1])])
+# nn = NN(2, 3, 2, 2)
+# nn.run(np.array([1, 0]))
+# nn.backpropagation(np.array([1, 0]), np.array([1, 0]))
+# nn.train([np.array([1, 0]), np.array([0, 1])], [np.array([1, 0]), np.array([0, 1])])
 
-print(nn.run(np.array([1, 0])))
+# print(nn.run(np.array([1, 0])))
 
 # a = np.array([1, 0])
 # b = np.array([[1, 2, 3],[4, 5, 6]])
